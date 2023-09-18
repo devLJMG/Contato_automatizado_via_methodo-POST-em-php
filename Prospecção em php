@@ -1,0 +1,53 @@
+
+script de formulario de contato via emails
+
+<?php
+// Incluindo bibliotecas necessárias para o envio de e-mails seguros
+require 'PHPMailer/PHPMailer.php';
+require 'PHPMailer/SMTP.php';
+
+// Usando namespaces para facilitar o uso das classes PHPMailer
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+// Verificando se a requisição é do tipo POST
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Filtrando e validando os dados do formulário
+    $nome = filter_input(INPUT_POST, "nome", FILTER_SANITIZE_STRING);
+    $email = filter_input(INPUT_POST, "email", FILTER_VALIDATE_EMAIL);
+    $mensagem = filter_input(INPUT_POST, "mensagem", FILTER_SANITIZE_STRING);
+    
+    // Verificando se algum dado é inválido
+    if (!$nome  !$email  !$mensagem) {
+        echo "Por favor, preencha todos os campos corretamente.";
+    } else {
+        // Configuração e envio seguro do e-mail usando PHPMailer
+        $mail = new PHPMailer(true);
+        try {
+            // Configurações do servidor SMTP
+            $mail->isSMTP();
+            $mail->Host = 'smtp.example.com'; // Substitua pelo seu servidor SMTP
+            $mail->SMTPAuth = true;
+            $mail->Username = 'seuemail@example.com'; // Seu e-mail
+            $mail->Password = 'sua_senha'; // Sua senha
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+            
+            // Configurações do e-mail
+            $mail->setFrom('seuemail@example.com', 'Seu Nome');
+            $mail->addAddress('destinatario@example.com', 'Destinatário');
+            $mail->isHTML(false);
+            
+            // Configuração do assunto e corpo do e-mail
+            $mail->Subject = "Nova mensagem de contato de $nome";
+            $mail->Body = "Nome: $nome\nEmail: $email\nMensagem:\n\n$mensagem";
+            
+            // Enviando o e-mail
+            $mail->send();
+            echo "Mensagem enviada com sucesso!";
+        } catch (Exception $e) {
+            echo "Ocorreu um erro ao enviar a mensagem: {$mail->ErrorInfo}";
+        }
+    }
+}
